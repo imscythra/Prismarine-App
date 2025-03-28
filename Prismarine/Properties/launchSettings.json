@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Prismarine (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "Prismarine (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
