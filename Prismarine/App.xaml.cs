@@ -15,6 +15,7 @@ using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using Microsoft.UI.Xaml.Shapes;
+using System.Diagnostics;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -43,6 +44,11 @@ namespace Prismarine
         {
             m_window = new MainWindow();
             m_window.Activate();
+            AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
+            {
+                Debug.WriteLine($"Unhandled exception: {e.ExceptionObject}");
+            };
+
         }
 
         private Window? m_window;

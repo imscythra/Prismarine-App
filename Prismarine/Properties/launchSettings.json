@@ -1,7 +1,8 @@
 {
   "profiles": {
     "Prismarine (Package)": {
-      "commandName": "MsixPackage"
+      "commandName": "MsixPackage",
+      "nativeDebugging": true
     },
     "Prismarine (Unpackaged)": {
       "commandName": "Project"

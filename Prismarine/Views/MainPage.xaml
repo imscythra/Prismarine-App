@@ -8,6 +8,8 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:dwui="using:DevWinUI"
     xmlns:controls="using:CommunityToolkit.WinUI.Controls"
+    xmlns:ui="using:CommunityToolkit.WinUI"
+    xmlns:helpers="using:Prismarine.Helpers"
     mc:Ignorable="d">
     <Grid>
         <Grid Margin="12,0" VerticalAlignment="Top">
@@ -18,47 +20,201 @@
             </Grid.ColumnDefinitions>
             <StackPanel>
                 <Grid>
-                    <TextBox HorizontalAlignment="Stretch" Margin="0,0,104,0" CornerRadius="8" Padding="32,10,32,10" BorderBrush="Transparent"
-                             FontWeight="SemiBold" PlaceholderText="Enter a YouTube URL" TextAlignment="Center"/>
+                    <TextBox HorizontalAlignment="Stretch" Margin="0,0,78,0" CornerRadius="8" Padding="32,10,32,10" BorderBrush="Transparent"
+                             FontWeight="SemiBold" PlaceholderText="Enter a YouTube URL or search" TextAlignment="Center"/>
                     <Button Style="{ThemeResource AccentButtonStyle}" Padding="8" HorizontalAlignment="Right">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Spacing="8">
                             <StackPanel Spacing="8" Orientation="Horizontal">
                                 <FontIcon Glyph="&#xE710;"/>
-                                <TextBlock FontWeight="SemiBold" Text="Add link"/>
+                                <TextBlock FontWeight="SemiBold" Text="Add"/>
                             </StackPanel>
                         </StackPanel>
                     </Button>
                 
                     <FontIcon Glyph="&#xE774;" FontSize="16" HorizontalAlignment="Left" Margin="10,0"/>
                 </Grid>
-                
             </StackPanel>
             <Button Padding="8" HorizontalAlignment="Right" Background="Transparent" Grid.Column="1">
                 <FontIcon Glyph="&#xE713;" FontSize="16"/>
             </Button>
         </Grid>
-        <Grid Margin="12,52,12,12" CornerRadius="6">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition MaxWidth="300"/>
-            </Grid.ColumnDefinitions>
+        <controls:SwitchPresenter Value="Downloader">
+            <controls:Case Value="DownloadList">
+                <Grid Margin="12,52,12,40" CornerRadius="6">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition MinWidth="200" MaxWidth="300"/>
+                    </Grid.ColumnDefinitions>
 
-            <Grid Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
-                
-            </Grid>
-            <Grid Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" Grid.Column="1">
-                
-            </Grid>
-            <controls:GridSplitter Grid.Column="1"
-                               Width="16"
-                               HorizontalAlignment="Left"
-                               ResizeBehavior="BasedOnAlignment"
-                               ResizeDirection="Auto">
-                <controls:GridSplitter.RenderTransform>
-                    <TranslateTransform X="-7" />
-                </controls:GridSplitter.RenderTransform>
-            </controls:GridSplitter>
+                    <Grid Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" Margin="0,0,2,0" CornerRadius="8">
+                        <Grid>
+                            <Grid Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" VerticalAlignment="Top">
+                                <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" Text="Downloads" Margin="22,10"/>
+                            </Grid>
+                            <ListView x:Name="fileList" IsDoubleTapEnabled="True" DoubleTapped="fileList_DoubleTapped" ItemsSource="{x:Bind ViewModel.Videos, Mode=OneWay}" Margin="0,48,0,8" Padding="0,4,12,0">
+                                <ListView.ItemTemplate>
+                                    <DataTemplate x:DataType="helpers:VideoHelper">
+                                        <StackPanel Orientation="Horizontal" Padding="0,6">
+                                            <Image Source="{x:Bind ThumbnailPath}" Width="100" Height="60"/>
+                                            <StackPanel>
+                                                <TextBlock Text="{x:Bind FileName}" FontWeight="Bold" TextTrimming="CharacterEllipsis" TextWrapping="WrapWholeWords"/>
+                                                <TextBlock Text="{x:Bind Duration}" Foreground="Gray"/>
+                                                <TextBlock Text="{x:Bind DateModified}"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                                <ListView.ItemContainerTransitions>
+                                    <TransitionCollection>
+                                        <PopupThemeTransition/>
+                                    </TransitionCollection>
+                                </ListView.ItemContainerTransitions>
 
+                            </ListView>
+                            <StackPanel Orientation="Horizontal" Margin="6" VerticalAlignment="Top" HorizontalAlignment="Right" Grid.Column="1">
+                                <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE71C;" Margin="8,0"/>
+                                <ComboBox x:Name="filterOption" Height="34" CornerRadius="17" Background="Transparent" BorderThickness="2" SelectionChanged="filterOption_SelectionChanged" SelectedIndex="0">
+                                    <ComboBoxItem Content="All types"/>
+                                    <ComboBoxItem Content="Video (MP4)"/>
+                                    <ComboBoxItem Content="Music (MP3)"/>
+                                </ComboBox>
+                                <Border BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}" BorderThickness="1" Margin="8,4,0,4"/>
+                                <Button Height="34" Padding="12,0" CornerRadius="17"
+                                    Background="Transparent" BorderBrush="Transparent">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE838;" />
+                                        <TextBlock Style="{ThemeResource BaseTextBlockStyle}" Text="Open folder"/>
+                                    </StackPanel>
+                                </Button>
+
+
+                                <Button Height="34" Width="34" Padding="0" CornerRadius="24" x:Name="debugRefreshList" Click="debugRefreshList_Click" 
+                                    Background="Transparent" BorderBrush="Transparent">
+                                    <controls:SwitchPresenter x:Name="refreshPresenter" Value="Idle">
+                                        <controls:Case Value="Idle">
+                                            <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE72C;" FontSize="16"/>
+                                        </controls:Case>
+                                        <controls:Case Value="Working">
+                                            <ProgressRing Width="20" Height="20"/>
+                                        </controls:Case>
+                                    </controls:SwitchPresenter>
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+
+                    </Grid>
+
+                    <Grid Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" Margin="4,0,0,0" CornerRadius="8" Grid.Column="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition Height="auto"/>
+                        </Grid.RowDefinitions>
+
+                        <StackPanel VerticalAlignment="Center" Margin="24,0" Spacing="8">
+                            <Image Source="/Assets/SplashScreen.png"/>
+                            <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" Text="A VERY LONG AHH FILENAME THAT SURELY WON'T FIT HERE.mp4" TextAlignment="Center"/>
+                            <TextBlock Style="{ThemeResource BaseTextBlockStyle}" Text="Modified on 24/3/2025" TextAlignment="Center"/>
+                            <TextBlock Text="Duration: 5:29" TextAlignment="Center"/>
+                        </StackPanel>
+                        <StackPanel VerticalAlignment="Bottom" Spacing="8" Margin="12" HorizontalAlignment="Stretch" Grid.Row="1">
+                            <Button Style="{ThemeResource AccentButtonStyle}" HorizontalAlignment="Stretch">
+                                <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Stretch">
+                                    <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE768;" />
+                                    <TextBlock Style="{ThemeResource BaseTextBlockStyle}" Text="Play file"/>
+                                </StackPanel>
+                            </Button>
+                            <Button HorizontalAlignment="Stretch">
+                                <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Stretch">
+                                    <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE8A7;" />
+                                    <TextBlock Style="{ThemeResource BaseTextBlockStyle}" Text="Open with"/>
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </controls:Case>
+            <controls:Case Value="Downloader">
+                <Grid Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" Margin="12,52,12,40" CornerRadius="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition MinWidth="300"/>
+                        <ColumnDefinition Width="2*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}" Margin="16" BorderThickness="0,0,2,0">
+                        <Button Height="40" CornerRadius="20" Padding="10,6" VerticalAlignment="Top">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Glyph="&#xE973;" />
+                                <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="Go back"/>
+                            </StackPanel>
+                        </Button>
+                        <ScrollViewer CornerRadius="6" Margin="0,48,0,0" VerticalScrollBarVisibility="Auto">
+                            <StackPanel Margin="0,0,16,0">
+                                <Grid Margin="0,16,0,0" MaxHeight="400" CornerRadius="6">
+                                    <Image Source="https://c4.wallpaperflare.com/wallpaper/920/583/724/blue-background-microsoft-windows-8-wallpaper-preview.jpg" Stretch="Uniform"/>
+                                    <Grid Background="{ThemeResource ControlOnImageFillColorDefaultBrush}" Padding="6,4" CornerRadius="4"
+                                          VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="12">
+                                        <TextBlock Text="6:01" Style="{ThemeResource BaseTextBlockStyle}" FontSize="14"/>
+                                    </Grid>
+                                </Grid>
+                                <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" Text="This is NOT Windows 7" Margin="0,16,0,0" TextAlignment="Center"/>
+                                <TextBlock Style="{ThemeResource BaseTextBlockStyle}" Text="Enderman" TextAlignment="Center"/>
+                                <TextBlock Style="{ThemeResource CaptionTextBlockStyle}" Margin="0,8,0,0" Text="02/08/2024 • 1389 likes" TextAlignment="Center"/>
+                                <HyperlinkButton HorizontalAlignment="Center" Content="https://youtube.com/?watch=hASnx75Sx"
+                                        Margin="0,12,0,0"/>
+                                <Button HorizontalAlignment="Stretch" Margin="0,24,0,12" Padding="0,12">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE786;" />
+                                        <TextBlock Style="{ThemeResource BaseTextBlockStyle}" Text="Watch on YouTube"/>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Grid>
+                    <Grid Grid.Column="1" Margin="16">
+                        <StackPanel Spacing="4">
+                            <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" Text="Download type"/>
+                            <controls:Segmented Margin="0,12">
+                                <controls:SegmentedItem Content="Video + Audio"
+                                                        Icon="{ui:FontIcon Glyph=&#xE8B2;}" />
+                                <controls:SegmentedItem Content="Video only"
+                                                        Icon="{ui:FontIcon Glyph=&#xE714;}" />
+                                <controls:SegmentedItem Content="Audio only"
+                                                        Icon="{ui:FontIcon Glyph=&#xEC4F;}" />
+
+                            </controls:Segmented>
+                            
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </controls:Case>
+        </controls:SwitchPresenter>
+        
+        <Grid Height="40" VerticalAlignment="Bottom">
+            <controls:SwitchPresenter Value="Ready" Margin="16,0,12,4">
+                <controls:Case Value="Ready">
+                    <StackPanel Orientation="Horizontal" Spacing="8" Opacity="0.7">
+                        <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE945;" FontSize="16"/>
+                        <TextBlock VerticalAlignment="Center" Text="Ready" FontSize="14"/>
+                    </StackPanel>
+                </controls:Case>
+                <controls:Case Value="Working">
+                    <StackPanel Orientation="Horizontal" Spacing="8" Opacity="0.7">
+                        <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xF16A;" FontSize="16"/>
+                        <TextBlock VerticalAlignment="Center" Text="Download in progress" FontSize="14"/>
+                    </StackPanel>
+                </controls:Case>
+                <controls:Case Value="NoInternet">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE7BA;" FontSize="16" Foreground="{ThemeResource SystemFillColorCautionBrush}"/>
+                        <TextBlock VerticalAlignment="Center" Text="No Internet" FontSize="14" Foreground="{ThemeResource SystemFillColorCautionBrush}"/>
+                    </StackPanel>
+                </controls:Case>
+                <controls:Case Value="Error">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xEA39;" FontSize="16" Foreground="{ThemeResource SystemFillColorCriticalBrush}"/>
+                        <TextBlock VerticalAlignment="Center" Text="Error (see details)" FontSize="14" Foreground="{ThemeResource SystemFillColorCriticalBrush}"/>
+                    </StackPanel>
+                </controls:Case>
+            </controls:SwitchPresenter>
         </Grid>
     </Grid>
 </Page>
